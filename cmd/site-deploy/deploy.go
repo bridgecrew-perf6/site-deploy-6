@@ -46,6 +46,11 @@ func deploySite(message *stan.Msg) {
         return
     }
 
+    if err := deleteCurrentContents(depInfo.BaseDir); err != nil {
+        logger.Errorf("failed to delete file: %s", err)
+        return
+    }
+
     if err := unzip(depInfo.TmpFilePath, depInfo.BaseDir); err != nil {
         logger.Errorf("failed to unzip file: %s", err)
         return
@@ -55,10 +60,32 @@ func deploySite(message *stan.Msg) {
     return
 }
 
+func deleteCurrentContents(dir string) error {
+    d, err := os.Open(dir)
+    if err != nil {
+        return err
+    }
+    defer d.Close()
+
+    fnames, err := d.Readdirnames(-1)
+    if err != nil {
+        return err
+    }
+
+    for _, n := range fnames {
+        err := os.RemoveAll(filepath.Join(dir, n))
+        if err != nil {
+            return err
+        }
+    }
+
+    return nil
+}
+
 func unzip(src string, dest string) error {
     r, err := zip.OpenReader(src)
     if err != nil {
-        return fmt.Errorf("error: %v\n", err)
+        return err
     }
     defer r.Close()
 
@@ -75,17 +102,17 @@ func unzip(src string, dest string) error {
         }
 
         if err = os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
-            return fmt.Errorf("%v", err)
+            return err
         }
 
         outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
         if err != nil {
-            return fmt.Errorf("%v", err)
+            return err
         }
 
         rc, err := f.Open()
         if err != nil {
-            return fmt.Errorf("%v", err)
+            return err
         }
 
         _, err = io.Copy(outFile, rc)
@@ -94,7 +121,7 @@ func unzip(src string, dest string) error {
         rc.Close()
 
         if err != nil {
-            return fmt.Errorf("%v", err)
+            return err
         }
     }
 

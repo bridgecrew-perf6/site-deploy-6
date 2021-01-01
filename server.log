@@ -1,0 +1,5 @@
+INFO : 2021/01/02 00:25:30.085628 main.go:33: server params: server: nats.kdm.home, cluster: mycluster, log-path: ./server.log, verbose: true
+INFO : 2021/01/02 00:25:30.097469 main.go:53: connected. NatsServer: nats.kdm.home, Cluster: [mycluster], ClientId: [test], Subject: [deploy]
+INFO : 2021/01/02 00:25:30.101313 main.go:70: listening, subject: [deploy], clientId: [test]
+INFO : 2021/01/02 00:25:31.847924 deploy.go:59: deploy completed: kdmw.dev:v1.1.0
+ERROR: 2021/01/02 00:25:34.918914 main.go:85: signal received: interrupt

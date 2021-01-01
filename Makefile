@@ -1,4 +1,4 @@
-VERSION=v0.1.0
+VERSION=v0.2.0
 
 build:
 	go build -o ./bin/site-deploy  -ldflags="-s -w -X main.version=$(VERSION)" -trimpath ./cmd/site-deploy
