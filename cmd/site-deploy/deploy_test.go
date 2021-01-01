@@ -21,7 +21,7 @@ func TestValidateMsg(t *testing.T) {
 }
 
 func TestGetDeploymentInfo(t *testing.T) {
-    os.Setenv("DEPLOY_BASE_DIR", "/home/kkodama/work/tmp")
+    os.Setenv("DEPLOY_BASE_DIR", "/tmp")
     os.Setenv("TMP_DIR", "/tmp")
     os.Setenv("DOWNLOAD_REPO", "https://example.com/repo")
     os.Setenv("DOWNLOAD_FILE", "sample.zip")
@@ -29,7 +29,7 @@ func TestGetDeploymentInfo(t *testing.T) {
     assert.Equal(t, DeploymentInfo{
         SiteName:"example.com",
         Version:"v1.0.0",
-        BaseDir:"/home/kkodama/work/tmp/example.com",
+        BaseDir:"/tmp/example.com",
         TmpFilePath:"/tmp/example.com.zip",
         URL:"https://example.com/repo/releases/download/v1.0.0/sample.zip",
     }, ok)
@@ -48,7 +48,7 @@ func TestValidateDeploymentInfo(t *testing.T) {
     info := DeploymentInfo{
         SiteName:"example.com",
         Version:"v1.0.0",
-        BaseDir:"/home/kkodama/work/tmp/example.com",
+        BaseDir:"/tmp/example.com",
         TmpFilePath:"/tmp/example.com.zip",
         URL:"https://example.com/repo/releases/download/v1.0.0/sample.zip",
     }
@@ -58,7 +58,7 @@ func TestValidateDeploymentInfo(t *testing.T) {
     ngInfo1 := DeploymentInfo{
         SiteName:"example.com",
         Version:"v1.0.0",
-        BaseDir:"/home/kkodama/work/tmp/example.com/error",
+        BaseDir:"/tmp/example.com/error",
         TmpFilePath:"/tmp/example.com.zip",
         URL:"https://example.com/repo/releases/download/v1.0.0/sample.zip",
     }
@@ -68,7 +68,7 @@ func TestValidateDeploymentInfo(t *testing.T) {
     ngInfo2 := DeploymentInfo{
         SiteName:"example.com",
         Version:"v1.0.0",
-        BaseDir:"/home/kkodama/work/tmp/example.com",
+        BaseDir:"/tmp/example.com",
         TmpFilePath:"/error/example.com.zip",
         URL:"https://example.com/repo/releases/download/v1.0.0/sample.zip",
     }

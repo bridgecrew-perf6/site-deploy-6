@@ -11,6 +11,8 @@ import (
     "net/http"
     "io"
     "path/filepath"
+    "archive/zip"
+    "strings"
 )
 
 type DeploymentInfo struct {
@@ -44,12 +46,59 @@ func deploySite(message *stan.Msg) {
         return
     }
 
-/*
-    if err := deploy(depInfo); err != nil {
-        logger.Errorf("failed to download file: %s", err)
+    if err := unzip(depInfo.TmpFilePath, depInfo.BaseDir); err != nil {
+        logger.Errorf("failed to unzip file: %s", err)
+        return
     }
-*/
+
+    logger.Infof("deploy completed: %s", msg)
     return
+}
+
+func unzip(src string, dest string) error {
+    r, err := zip.OpenReader(src)
+    if err != nil {
+        return fmt.Errorf("error: %v\n", err)
+    }
+    defer r.Close()
+
+    for _, f := range r.File {
+        fpath := filepath.Join(dest, f.Name)
+
+        if !strings.HasPrefix(fpath, filepath.Clean(dest)+string(os.PathSeparator)) {
+            return fmt.Errorf("%s: illegal file path", fpath)
+        }
+
+        if f.FileInfo().IsDir() {
+            os.MkdirAll(fpath, os.ModePerm)
+            continue
+        }
+
+        if err = os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
+            return fmt.Errorf("%v", err)
+        }
+
+        outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+        if err != nil {
+            return fmt.Errorf("%v", err)
+        }
+
+        rc, err := f.Open()
+        if err != nil {
+            return fmt.Errorf("%v", err)
+        }
+
+        _, err = io.Copy(outFile, rc)
+
+        outFile.Close()
+        rc.Close()
+
+        if err != nil {
+            return fmt.Errorf("%v", err)
+        }
+    }
+
+    return nil
 }
 
 func validateMsg(msg string) error {

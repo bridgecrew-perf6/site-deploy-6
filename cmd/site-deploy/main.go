@@ -50,10 +50,11 @@ func main() {
         logger.Fatalf("connection failed: %v, NATS streaming server URL: %v", err, opts.NatsServer)
     }
 
-    logger.Infof("connected. NatsServer: %v, Cluster: [%v], ClientId: [%v]",
+    logger.Infof("connected. NatsServer: %v, Cluster: [%v], ClientId: [%v], Subject: [%v]",
         opts.NatsServer,
         opts.Cluster,
         opts.ClientId,
+        opts.Subject,
     )
 
     sub, err := sc.Subscribe(
