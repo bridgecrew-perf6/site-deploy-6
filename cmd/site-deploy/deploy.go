@@ -15,7 +15,6 @@ import (
     "strings"
     "encoding/json"
     "bytes"
-    "io/ioutil"
 )
 
 type DeploymentInfo struct {
