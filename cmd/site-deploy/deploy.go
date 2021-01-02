@@ -77,8 +77,12 @@ func notifySlack(msg string) error {
     }
     URL := os.Getenv("SLACK_WEBHOOK")
 
+    hostname, err := os.Hostname()
+    if err != nil {
+        hostname = "<error>"
+    }
     params := SlackParams{
-        Text: fmt.Sprintf("deploy completed: %s", msg),
+        Text: fmt.Sprintf("deploy completed: %s, host: %s", msg, hostname),
     }
 
     js, err := json.Marshal(params)
