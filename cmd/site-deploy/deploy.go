@@ -13,6 +13,9 @@ import (
     "path/filepath"
     "archive/zip"
     "strings"
+    "encoding/json"
+    "bytes"
+    "io/ioutil"
 )
 
 type DeploymentInfo struct {
@@ -21,6 +24,10 @@ type DeploymentInfo struct {
     BaseDir string
     TmpFilePath string
     URL string
+}
+
+type SlackParams struct {
+    Text string `json:"text"`
 }
 
 func deploySite(message *stan.Msg) {
@@ -56,8 +63,41 @@ func deploySite(message *stan.Msg) {
         return
     }
 
+    if err := notifySlack(msg); err != nil {
+        logger.Errorf("failed to notify slack: %s", err)
+        return
+    }
+
     logger.Infof("deploy completed: %s", msg)
     return
+}
+
+func notifySlack(msg string) error {
+    if os.Getenv("SLACK_WEBHOOK") == "" {
+        return errors.New("SLACK_WEBHOOK is not defined")
+    }
+    URL := os.Getenv("SLACK_WEBHOOK")
+
+    params := SlackParams{
+        Text: fmt.Sprintf("deploy completed: %s", msg),
+    }
+
+    js, err := json.Marshal(params)
+    if err != nil {
+        return err
+    }
+
+    res, err := http.Post(URL, "application/json", bytes.NewBuffer(js))
+    if err != nil {
+        return err
+    }
+    defer res.Body.Close()
+
+    if res.StatusCode < 200 || res.StatusCode >= 400 {
+        return fmt.Errorf("status code NG: %v", res.StatusCode)
+    }
+
+    return nil
 }
 
 func deleteCurrentContents(dir string) error {
